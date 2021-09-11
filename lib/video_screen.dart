@@ -35,9 +35,16 @@ class _VideoScreenState extends State<VideoScreen> {
                 ElevatedButton(
                     onPressed: () async {
                       await provider.pickVideo();
+                      await provider.playVideo(provider.videoFile);
                     },
-                    child: Text('')),
-                ElevatedButton(onPressed: () {}, child: Text('')),
+                    child: Text('Pick video')),
+                ElevatedButton(
+                    onPressed: () async {
+                      final file =
+                          await provider.replaceAudio(provider.videoFile);
+                      await provider.playVideo(file);
+                    },
+                    child: Text('Replace audio')),
               ],
             ),
           ),

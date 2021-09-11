@@ -18,26 +18,31 @@ class VideoProvider extends ChangeNotifier {
   Future<void> pickVideo() async {
     XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
     _videoFile = File(pickedFile!.path);
-    debugPrint('the path: $_videoFile');
-    _videoPlayerController = VideoPlayerController.file(
-      _videoFile!,
-    )..initialize().then((value) => _videoPlayerController!.play());
     notifyListeners();
-    await extractVideo(_videoFile!.path);
   }
 
-  Future<void> extractVideo(String input) async {
-    final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+  Future<void> playVideo(File videoFile) async {
+    _videoPlayerController = VideoPlayerController.file(videoFile)
+      ..initialize().then((value) => _videoPlayerController!.play());
+  }
+
+  Future<File> replaceAudio(File input) async {
+    final flutterFFmpeg = FlutterFFmpeg();
     final output = await getExternalStorageDirectory();
-    // 'ffmpeg -I $input -an output.mp4'
-    await _flutterFFmpeg.executeWithArguments([
+
+    await flutterFFmpeg.executeWithArguments([
       '-y',
       '-i',
-      input,
+      input.path,
       '-vcodec',
       'copy',
       '-an',
       '${output!.path}/test.mp4'
-    ]).then((value) => debugPrint('the execution: $value'));
+    ]).then((executionCode) =>
+        debugPrint('the execution processed with code: $executionCode'));
+
+    _videoFile = File(output.path + '/test.mp4');
+    notifyListeners();
+    return File(output.path + '/test.mp4');
   }
 }
