@@ -20,32 +20,33 @@ class _VideoScreenState extends State<VideoScreen> {
         child: Scaffold(
           body: Container(
             margin: const EdgeInsets.all(32.0),
-            child: Column(
-              children: [
-                provider.videoFile == File('')
-                    ? Container(
-                        color: Colors.red,
-                        height: 300,
-                      )
-                    : Container(
-                        height: 300,
-                        child: VideoPlayer(provider.videoPlayerController ??
-                            VideoPlayerController.file(File(''))),
-                      ),
-                ElevatedButton(
-                    onPressed: () async {
-                      await provider.pickVideo();
-                      await provider.playVideo(provider.videoFile);
-                    },
-                    child: Text('Pick video')),
-                ElevatedButton(
-                    onPressed: () async {
-                      final file =
-                          await provider.replaceAudio(provider.videoFile);
-                      await provider.playVideo(file);
-                    },
-                    child: Text('Replace audio')),
-              ],
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  provider.videoFile.path == ''
+                      ? Container(
+                          color: Colors.red,
+                          height: 300,
+                        )
+                      : Container(
+                          height: 300,
+                          child: VideoPlayer(provider.videoPlayerController!),
+                        ),
+                  ElevatedButton(
+                      onPressed: () async {
+                        await provider.pickVideo();
+                        await provider.playVideo(provider.videoFile);
+                      },
+                      child: Text('Pick video')),
+                  ElevatedButton(
+                      onPressed: () async {
+                        await provider.replaceAudio();
+                        await provider.playVideo(provider.videoFile);
+                      },
+                      child: Text('Replace audio')),
+                ],
+              ),
             ),
           ),
         ),
@@ -55,7 +56,6 @@ class _VideoScreenState extends State<VideoScreen> {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
 }
