@@ -24,12 +24,13 @@ class VideoProvider extends ChangeNotifier {
     final pickedFile = await FilePicker.platform.pickFiles(
         allowMultiple: false,
         type: FileType.custom,
-        allowedExtensions: ['mp3', 'mp4']);
+        allowedExtensions: ['mp3', 'mp4', 'aac']);
 
     final quietVideo = await removeSound(_videoFile!);
-    final extractedSound =
-        await extractSound(File(pickedFile!.files.first.path));
-    final mergedSoundVideo = await mergeSound(quietVideo, extractedSound);
+    final extractedSound = await extractSound(
+        File(pickedFile!.files.first.path), pickedFile.files.first.extension!);
+    final mergedSoundVideo = await mergeSound(
+        quietVideo, extractedSound, pickedFile.files.first.extension!);
     _videoFile = mergedSoundVideo;
     notifyListeners();
   }
@@ -58,7 +59,7 @@ class VideoProvider extends ChangeNotifier {
     return File(output.path + '/quietVideo.mp4');
   }
 
-  Future<File> extractSound(File input) async {
+  Future<File> extractSound(File input, String extension) async {
     final flutterFFmpeg = FlutterFFmpeg();
     final output = await getExternalStorageDirectory();
 
@@ -68,18 +69,23 @@ class VideoProvider extends ChangeNotifier {
       input.path,
       '-acodec',
       'copy',
-      '${output!.path}/extractedSound.aac'
+      extension == 'mp4'
+          ? '${output!.path}/extractedSound.aac'
+          : '${output!.path}/extractedSound.mp3'
     ]).then((executionCode) => debugPrint(
         'The extraction execution processed with code: $executionCode'));
-    return File(output.path + '/extractedSound.aac');
+    return extension == 'mp4'
+        ? File(output.path + '/extractedSound.aac')
+        : File(output.path + '/extractedSound.mp3');
   }
 
-  Future<File> mergeSound(File video, File audio) async {
+  Future<File> mergeSound(File video, File audio, String extension) async {
     final flutterFFmpeg = FlutterFFmpeg();
     final output = await getExternalStorageDirectory();
 
     await flutterFFmpeg.executeWithArguments([
       '-y',
+      '-stream_loop',
       '-i',
       video.path,
       '-i',
