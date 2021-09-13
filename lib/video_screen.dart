@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:audio_player_app/providers/video_provider.dart';
+import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -39,12 +41,33 @@ class _VideoScreenState extends State<VideoScreen> {
                         await provider.playVideo(provider.videoFile);
                       },
                       child: Text('Pick video')),
-                  ElevatedButton(
-                      onPressed: () async {
-                        await provider.replaceAudio();
-                        await provider.playVideo(provider.videoFile);
-                      },
-                      child: Text('Replace audio')),
+                  Visibility(
+                    visible: provider.pickedVideo!,
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          await provider.replaceAudio();
+                          await provider.playVideo(provider.videoFile);
+                        },
+                        child: Text('Replace audio')),
+                  ),
+                  Visibility(
+                    visible: provider.alteredVideo!,
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          await GallerySaver.saveVideo(provider.videoFile.path,
+                              albumName: 'app_movies');
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Video saved!'),
+                              action: SnackBarAction(
+                                label: 'See Image',
+                                onPressed: () async {
+                                  await DeviceApps.openApp(
+                                      'com.oneplus.gallery');
+                                },
+                              )));
+                        },
+                        child: Text('Save video')),
+                  ),
                 ],
               ),
             ),

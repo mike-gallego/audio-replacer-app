@@ -7,6 +7,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoProvider extends ChangeNotifier {
+  bool? _pickedVideo;
+  bool? get pickedVideo => _pickedVideo ?? false;
+
+  bool? _alteredVideo;
+  bool? get alteredVideo => _alteredVideo ?? false;
+
   File? _videoFile;
   File get videoFile => _videoFile ?? File('');
 
@@ -17,6 +23,7 @@ class VideoProvider extends ChangeNotifier {
     final pickedFile = await FilePicker.platform
         .pickFiles(allowMultiple: false, type: FileType.video);
     _videoFile = File(pickedFile!.files.first.path);
+    _pickedVideo = true;
     notifyListeners();
   }
 
@@ -32,6 +39,7 @@ class VideoProvider extends ChangeNotifier {
     final mergedSoundVideo = await mergeSound(
         quietVideo, extractedSound, pickedFile.files.first.extension!);
     _videoFile = mergedSoundVideo;
+    _alteredVideo = true;
     notifyListeners();
   }
 
@@ -85,7 +93,6 @@ class VideoProvider extends ChangeNotifier {
 
     await flutterFFmpeg.executeWithArguments([
       '-y',
-      '-stream_loop',
       '-i',
       video.path,
       '-i',
