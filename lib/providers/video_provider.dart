@@ -19,27 +19,36 @@ class VideoProvider extends ChangeNotifier {
   VideoPlayerController? _videoPlayerController;
   VideoPlayerController? get videoPlayerController => _videoPlayerController;
 
-  Future<void> pickVideo() async {
-    final pickedFile = await FilePicker.platform
-        .pickFiles(allowMultiple: false, type: FileType.video);
-    _videoFile = File(pickedFile!.files.first.path);
-    _pickedVideo = true;
+  Future<void> pickVideo({bool isTest = false}) async {
+    if (isTest) {
+      _pickedVideo = true;
+    } else {
+      final pickedFile = await FilePicker.platform
+          .pickFiles(allowMultiple: false, type: FileType.video);
+      _videoFile = File(pickedFile!.files.first.path);
+      _pickedVideo = true;
+    }
     notifyListeners();
   }
 
-  Future<void> replaceAudio() async {
-    final pickedFile = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        type: FileType.custom,
-        allowedExtensions: ['mp3', 'mp4', 'aac']);
+  Future<void> replaceAudio({bool isTest = false}) async {
+    if (isTest) {
+      _alteredVideo = true;
+    } else {
+      final pickedFile = await FilePicker.platform.pickFiles(
+          allowMultiple: false,
+          type: FileType.custom,
+          allowedExtensions: ['mp3', 'mp4', 'aac']);
 
-    final quietVideo = await removeSound(_videoFile!);
-    final extractedSound = await extractSound(
-        File(pickedFile!.files.first.path), pickedFile.files.first.extension!);
-    final mergedSoundVideo = await mergeSound(
-        quietVideo, extractedSound, pickedFile.files.first.extension!);
-    _videoFile = mergedSoundVideo;
-    _alteredVideo = true;
+      final quietVideo = await removeSound(_videoFile!);
+      final extractedSound = await extractSound(
+          File(pickedFile!.files.first.path),
+          pickedFile.files.first.extension!);
+      final mergedSoundVideo = await mergeSound(
+          quietVideo, extractedSound, pickedFile.files.first.extension!);
+      _videoFile = mergedSoundVideo;
+      _alteredVideo = true;
+    }
     notifyListeners();
   }
 
